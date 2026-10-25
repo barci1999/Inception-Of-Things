@@ -5,15 +5,32 @@ echo "🔍 Checking system dependencies..."
 # Check and install Docker
 if ! command -v docker > /dev/null 2>&1; then
     echo "⚙️ Docker is not installed. Installing..."
+    
+    # Esperar a que apt se libere si hay actualizaciones en segundo plano
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        echo "🔒 Waiting for background system updates to finish..."
+        sleep 5
+    done
+    
     sudo apt-get update -y
     sudo apt-get install -y curl ca-certificates gnupg
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
+    
+    # 1. Asegurar que el servicio arranca y se queda activo
+    sudo systemctl enable --now docker
+    
+    # 2. Obtener el usuario real de forma segura (evitando que sea root)
+    REAL_USER="${SUDO_USER:-$USER}"
+    if [ -n "$REAL_USER" ] && [ "$REAL_USER" != "root" ]; then
+        sudo usermod -aG docker "$REAL_USER"
+        echo "👤 Added user '$REAL_USER' to the 'docker' group."
+    fi
+    
     rm get-docker.sh
-    echo "✅ Docker successfully installed!"
-else
-    echo "✅ Docker is already installed."
+    echo "✅ Docker successfully installed and started!"
+    echo "⚠️ NOTE: If you run scripts immediately in this same terminal session,"
+    echo "   please run 'newgrp docker' or open a new terminal first."
 fi
 
 # Check and install K3d
