@@ -30,6 +30,7 @@ init:
 	@echo "	- Objetivo: Espera a que los CRDs de Argo CD estén listos y aplica el archivo argocd-app.yaml. Este archivo le indica a Argo CD que vigile tu repo de GitHub (específicamente la carpeta k8s/ con el deployment.yaml y service.yaml en v1)."
 prueba: setup
 	@bash scripts/cluster.sh
+	@bash scripts/namespace.sh
 clean:
 	@bash scripts/clean.sh
 
