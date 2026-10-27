@@ -1,8 +1,17 @@
-Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu-jammy"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-vagrant.box"
+require "securerandom"
 
-  # Desactivar la sustitución automática de la clave SSH para evitar el fallo de clave privada
+# (Nacho) Token de K3s: se genera una vez en .k3s-token (ignorado por git), en vez de estar escrito en el repo.
+TOKEN_FILE = File.join(__dir__, ".k3s-token")
+File.write(TOKEN_FILE, SecureRandom.hex(32)) unless File.exist?(TOKEN_FILE)
+K3S_TOKEN = File.read(TOKEN_FILE).strip
+
+Vagrant.configure("2") do |config|
+  # (Nacho) Rocky Linux 10: última versión estable, y la box la publica la propia distro.
+  # Ubuntu solo publica box de Vagrant para la 22.04, que ya no es la última.
+  config.vm.box = "rockylinux-10"
+  config.vm.box_url = "https://dl.rockylinux.org/pub/rocky/10/images/x86_64/Rocky-10-Vagrant-Vbox.latest.x86_64.vagrant.virtualbox.box"
+  # (Nacho) Sin carpeta compartida: los scripts los sube Vagrant y no dependemos de las Guest Additions.
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.define "smarquezS" do |server|
     server.vm.hostname = "smarquezS"
@@ -11,7 +20,7 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 1
     end
-    server.vm.provision "shell", path: "scripts/server.sh"
+    server.vm.provision "shell", path: "scripts/server.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 
   config.vm.define "smarquezSW" do |control|
@@ -21,6 +30,6 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 1
     end
-    control.vm.provision "shell", path: "scripts/worker.sh"
+    control.vm.provision "shell", path: "scripts/worker.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 end
