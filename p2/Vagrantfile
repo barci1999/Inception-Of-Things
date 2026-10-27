@@ -1,0 +1,21 @@
+# P2: una sola VM (smarquezS) con K3s en modo server y las 3 apps de confs/.
+Vagrant.configure("2") do |config|
+  # Rocky Linux 10: última versión estable, y la box la publica la propia distro.
+  config.vm.box = "rockylinux-10"
+  config.vm.box_url = "https://dl.rockylinux.org/pub/rocky/10/images/x86_64/Rocky-10-Vagrant-Vbox.latest.x86_64.vagrant.virtualbox.box"
+  # Sin carpeta compartida: los ficheros los sube Vagrant y no dependemos de las Guest Additions.
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.define "smarquezS" do |server|
+    server.vm.hostname = "smarquezS"
+    server.vm.network "private_network", ip: "192.168.56.110"
+    server.vm.provider "virtualbox" do |v|
+      v.name = "smarquezS"
+      # K3s pide 2 GB para el server, y aquí corren además Traefik y 5 pods.
+      v.memory = 2048
+      v.cpus = 1
+    end
+    server.vm.provision "file", source: "confs", destination: "/tmp/confs"
+    server.vm.provision "shell", path: "scripts/server.sh"
+  end
+end
