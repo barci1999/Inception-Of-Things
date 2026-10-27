@@ -6,7 +6,7 @@ MANIFEST_URL="https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifest
 echo "🐙 Installing Argo CD into namespace '$NAMESPACE'..."
 
 # 1. Aplicar manifiestos oficiales de Argo CD
-sg docker -c "kubectl apply -n $NAMESPACE -f $MANIFEST_URL"
+sg docker -c "kubectl apply -n $NAMESPACE --server-side --force-conflicts -f $MANIFEST_URL"
 
 # 2. Esperar a que los pods de Argo CD estén listos
 echo "⏳ Waiting for Argo CD components to be ready..."
