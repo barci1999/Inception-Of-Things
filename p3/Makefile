@@ -31,6 +31,7 @@ init:
 prueba: setup
 	@bash scripts/cluster.sh
 	@bash scripts/namespace.sh
+	@bash scripts/initArgo.sh
 clean:
 	@bash scripts/clean.sh
 
