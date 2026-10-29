@@ -1,0 +1,69 @@
+# app3: responde a cualquier HOST que no sea app1.com ni app2.com
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-three-html
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>app3</title></head>
+    <body>
+      <h1>Hello from app3.</h1>
+      <p>pod: <!--# echo var="hostname" --></p>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-three
+  labels:
+    app: app-three
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-three
+  template:
+    metadata:
+      labels:
+        app: app-three
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.30.6-alpine-slim
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+            - name: conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+      volumes:
+        - name: html
+          configMap:
+            name: app-three-html
+        - name: conf
+          configMap:
+            name: nginx-ssi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-three
+spec:
+  selector:
+    app: app-three
+  ports:
+    - port: 80
+      targetPort: 80
