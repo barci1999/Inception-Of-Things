@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CLUSTER_NAME="iot-cluster"
-CONFIG_FILE="conf/k3d-config.yaml"
+CONFIG_FILE="confs/k3d-config.yaml"
 
 echo "🔍 Checking Kubernetes cluster status..."
 cat "$CONFIG_FILE"
