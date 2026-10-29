@@ -21,7 +21,8 @@ if ! command -v docker > /dev/null 2>&1; then
     sudo systemctl enable --now docker
     
     # 2. Obtener el usuario real de forma segura (evitando que sea root)
-    REAL_USER="${SUDO_USER:-$USER}"
+    # (Nacho) Si $USER está vacío, lo sacamos con id -un para no quedarnos fuera del grupo docker
+    REAL_USER="${SUDO_USER:-${USER:-$(id -un)}}"
     if [ -n "$REAL_USER" ] && [ "$REAL_USER" != "root" ]; then
         sudo usermod -aG docker "$REAL_USER"
         echo "👤 Added user '$REAL_USER' to the 'docker' group."
@@ -45,7 +46,9 @@ fi
 # Check and install kubectl
 if ! command -v kubectl > /dev/null 2>&1; then
     echo "⚙️ kubectl is not installed. Installing..."
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    # (Nacho) kubectl para el procesador de la máquina (amd64 en Intel/AMD, arm64 en ARM)
+    ARCH=$(dpkg --print-architecture)
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl"
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin/
     echo "✅ kubectl successfully installed!"

@@ -21,7 +21,11 @@ else
     # Check if config file exists before creating
     if [ -f "$CONFIG_FILE" ]; then
         # Forzamos la ejecución con los permisos del grupo docker actualizados
-        sg docker -c "k3d cluster create -c \"$CONFIG_FILE\""
+        # (Nacho) Solo decimos que se ha creado si k3d no ha fallado
+        if ! sg docker -c "k3d cluster create -c \"$CONFIG_FILE\""; then
+            echo "❌ Error: k3d could not create cluster '$CLUSTER_NAME'."
+            exit 1
+        fi
         echo "✅ Cluster '$CLUSTER_NAME' successfully created!"
     else
         echo "❌ Error: Configuration file '$CONFIG_FILE' not found!"
