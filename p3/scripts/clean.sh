@@ -13,25 +13,14 @@ fi
 # Comprobamos si el clúster existe antes de borrarlo
 if sg docker -c "k3d cluster list" | grep -q "$CLUSTER_NAME"; then
     echo "⚙️ Deleting K3d cluster '$CLUSTER_NAME'..."
-    sg docker -c "k3d cluster delete \"$CLUSTER_NAME\""
+    # (Nacho) Solo decimos que se ha borrado si k3d no ha fallado
+    if ! sg docker -c "k3d cluster delete \"$CLUSTER_NAME\""; then
+        echo "❌ Error: k3d could not delete cluster '$CLUSTER_NAME'."
+        exit 1
+    fi
     echo "✅ Cluster '$CLUSTER_NAME' successfully deleted!"
 else
     echo "ℹ️ Cluster '$CLUSTER_NAME' does not exist. Nothing to delete."
 fi
-if command -v kubectl > /dev/null 2>&1; then
-    # Verificamos si el contexto de kubernetes está activo para no dar errores tontos
-    if sg docker -c "kubectl cluster-info" > /dev/null 2>&1; then
-        echo "🗑️ Cleaning up namespaces..."
-        for ns in "${NAMESPACES[@]}"; do
-            if sg docker -c "kubectl get namespace "$ns"" > /dev/null 2>&1; then
-                echo "⚙️ Deleting namespace '$ns'..."
-                sg docker -c "kubectl delete namespace "$ns" --timeout=60s" || true
-                echo "✅ Namespace '$ns' deleted."
-            else
-                echo "ℹ️ Namespace '$ns' does not exist."
-            fi
-        done
-    else
-        echo "ℹ️ Kubernetes cluster is not running. Namespaces are already gone."
-    fi
-fi
+# (Nacho) Quitado el bloque que borraba namespaces: no hacía nada (NAMESPACES no existía aquí)
+# y al borrar el clúster ya desaparecen sus namespaces, Argo CD y la app.
