@@ -1,0 +1,5 @@
+# Estado local de Vagrant: cada ordenador tiene el suyo
+.vagrant/
+# Token de K3s que genera el Vagrantfile de p1
+.k3s-token
+.DS_Store
