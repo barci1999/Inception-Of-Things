@@ -5,25 +5,35 @@ MANIFEST_URL="https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifest
 
 echo "🐙 Installing Argo CD into namespace '$NAMESPACE'..."
 
-# 1. Aplicar manifiestos oficiales de Argo CD
-# (Nacho) Si falla la instalación, paramos aquí en vez de seguir esperando
+# 1. Aplicar manifiestos oficiales de Argo CD (dentro de sg docker como prefieres)
 if ! sg docker -c "kubectl apply -n $NAMESPACE --server-side --force-conflicts -f $MANIFEST_URL"; then
     echo "❌ Error: could not apply the Argo CD manifests."
     exit 1
 fi
 
-# 2. Esperar a que los pods de Argo CD estén listos
-echo "⏳ Waiting for Argo CD components to be ready..."
-if ! sg docker -c "kubectl wait --namespace $NAMESPACE \
-  --for=condition=available deployment \
-  --all \
-  --timeout=300s"; then
-    echo "❌ Error: Argo CD components did not become ready in 5 minutes."
+# 2. Esperar a que el servidor principal de Argo CD esté disponible mediante bucle de sondeo
+echo "⏳ Waiting for Argo CD server to be ready..."
+SERVER_READY=false
+for i in {1..60}; do
+    # Consultamos de forma segura si el deployment ya tiene al menos una réplica lista
+    READY_REPLICAS=$(sg docker -c "kubectl get deployment argocd-server -n $NAMESPACE -o jsonpath='{.status.readyReplicas}' 2>/dev/null" || echo "0")
+    
+    if [ "$READY_REPLICAS" = "1" ]; then
+        echo "✅ Argo CD server is ready!"
+        SERVER_READY=true
+        break
+    fi
+    
+    echo "⏳ Waiting for Argo CD server pods... (Attempt $i/60)"
+    sleep 5
+done
+
+if [ "$SERVER_READY" = "false" ]; then
+    echo "❌ Error: Argo CD server did not become ready in 5 minutes."
     exit 1
 fi
 
 # 3. Esperar a que el secreto de la contraseña esté disponible y extraerla
-# (Nacho) Como mucho 2 minutos (60 intentos x 2 s), para no quedarnos esperando para siempre
 echo "🔑 Waiting for Argo CD admin password secret to be generated..."
 PASSWORD=""
 for _ in $(seq 1 60); do
@@ -34,6 +44,7 @@ for _ in $(seq 1 60); do
     fi
     sleep 2
 done
+
 if [ -z "$PASSWORD" ]; then
     echo "❌ Error: the Argo CD admin password secret was not created."
     exit 1

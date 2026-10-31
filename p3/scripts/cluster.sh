@@ -21,7 +21,6 @@ else
     # Check if config file exists before creating
     if [ -f "$CONFIG_FILE" ]; then
         # Forzamos la ejecución con los permisos del grupo docker actualizados
-        # (Nacho) Solo decimos que se ha creado si k3d no ha fallado
         if ! sg docker -c "k3d cluster create -c \"$CONFIG_FILE\""; then
             echo "❌ Error: k3d could not create cluster '$CLUSTER_NAME'."
             exit 1
@@ -32,3 +31,14 @@ else
         exit 1
     fi
 fi
+
+# ⏳ AÑADIR AQUÍ: Esperar a que la API de Kubernetes esté completamente lista y respondiendo
+echo "⏳ Waiting for Kubernetes API server to be fully ready..."
+for i in {1..30}; do
+    if sg docker -c "kubectl cluster-info" >/dev/null 2>&1; then
+        echo "✅ Kubernetes API is ready!"
+        break
+    fi
+    echo "⏳ API server warming up... (Attempt $i/30)"
+    sleep 3
+done

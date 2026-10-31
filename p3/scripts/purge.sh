@@ -4,11 +4,10 @@ echo "🧹 Starting system purge (uninstalling Docker, K3d, and kubectl)..."
 
 # Uninstall Docker
 if command -v docker > /dev/null 2>&1; then
-echo "🗑️ Uninstalling Docker..."
-    sudo systemctl stop docker || true
-    sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras docker.io docker-engine || true
-    sudo apt-get autoremove -y --purge || true
-    sudo rm -rf /var/lib/docker /etc/docker /var/run/docker.sock || true
+    echo "🗑️ Uninstalling Docker..."
+    sudo systemctl stop docker.service docker.socket containerd.service 2>/dev/null || true
+    sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker.io docker-doc docker-compose || true
+    sudo rm -rf /var/lib/docker /etc/docker /var/run/docker.sock /var/lib/containerd
     echo "✅ Docker uninstalled."
 else
     echo "ℹ️ Docker was not installed."

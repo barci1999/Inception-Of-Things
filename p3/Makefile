@@ -32,6 +32,8 @@ prueba: setup
 	@bash scripts/cluster.sh
 	@bash scripts/namespace.sh
 	@bash scripts/initArgo.sh
+	@bash scripts/gitops.sh
+	@bash scripts/argoUI.sh
 clean:
 	@bash scripts/clean.sh
 

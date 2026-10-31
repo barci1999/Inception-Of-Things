@@ -12,15 +12,29 @@ if ! command -v docker > /dev/null 2>&1; then
         sleep 5
     done
     
+    # 1. Instalar dependencias previas
     sudo apt-get update -y
     sudo apt-get install -y curl ca-certificates gnupg
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+
+    # 2. Configurar la clave GPG y repositorio oficial de Docker adaptado a Ubuntu/Mint
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      noble stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    # 3. Actualizar e instalar Docker de forma limpia
+    sudo apt-get update -y
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     
-    # 1. Asegurar que el servicio arranca y se queda activo
-    sudo systemctl enable --now docker
+    # 4. Asegurar que el servicio arranca y se queda activo
+    sudo systemctl enable --now docker.service
+    sudo systemctl enable --now docker.socket
     
-    # 2. Obtener el usuario real de forma segura (evitando que sea root)
+    # 5. Obtener el usuario real de forma segura (evitando que sea root)
     # (Nacho) Si $USER está vacío, lo sacamos con id -un para no quedarnos fuera del grupo docker
     REAL_USER="${SUDO_USER:-${USER:-$(id -un)}}"
     if [ -n "$REAL_USER" ] && [ "$REAL_USER" != "root" ]; then
@@ -28,10 +42,10 @@ if ! command -v docker > /dev/null 2>&1; then
         echo "👤 Added user '$REAL_USER' to the 'docker' group."
     fi
     
-    rm get-docker.sh
     echo "✅ Docker successfully installed and started!"
-    echo "⚠️ NOTE: If you run scripts immediately in this same terminal session,"
-    echo "   please run 'newgrp docker' or open a new terminal first."
+else
+    echo "✅ Docker is already installed."
+    sudo systemctl enable --now docker.service docker.socket >/dev/null 2>&1 || true
 fi
 
 # Check and install K3d
