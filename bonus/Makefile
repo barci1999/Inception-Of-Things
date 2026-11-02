@@ -22,6 +22,8 @@ fclean:
 re: fclean init
 prueba:
 	@bash scripts/setup.sh
+	@bash scripts/cluster.sh
+	@bash scripts/namespace.sh
 
 
 .PHONY: setup purge

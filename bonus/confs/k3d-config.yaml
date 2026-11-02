@@ -17,3 +17,6 @@ ports:
   - port : 8888:8888
     nodeFilters:
     - loadbalancer
+  - port : 2222:22
+    nodeFilters:
+    - loadbalancer

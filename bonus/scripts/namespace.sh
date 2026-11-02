@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Lista de namespaces necesarios para el proyecto
-NAMESPACES=("argocd" "dev")
+NAMESPACES=("argocd" "dev" "gitlab")
 
 echo "📁 Checking and creating required namespaces..."
 
