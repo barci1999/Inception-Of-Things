@@ -1,0 +1,23 @@
+# La "Application" de Argo CD: le dice qué repo vigilar y dónde desplegarlo.
+# Argo CD revisa el repo cada 3 minutos; al cambiar v1 <-> v2 allí, actualiza la app en dev.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wil-playground
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Repo público con el login en el nombre, como pide el subject
+    repoURL: https://github.com/nmagro-r/nmagro-r-iot-argocd.git
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
