@@ -49,9 +49,3 @@ if [ -z "$PASSWORD" ]; then
     echo "❌ Error: the Argo CD admin password secret was not created."
     exit 1
 fi
-
-echo "===================================================="
-echo "✅ Argo CD successfully installed!"
-echo "👤 Username: admin"
-echo "🔑 Password: $PASSWORD"
-echo "===================================================="
