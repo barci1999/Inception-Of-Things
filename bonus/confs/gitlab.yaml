@@ -1,0 +1,111 @@
+# (Nacho) GitLab con la imagen oficial "todo en uno" (gitlab/gitlab-ce).
+# Desde el chart de Helm 10.0 (GitLab 19) el chart ya no trae PostgreSQL, Redis ni almacenamiento;
+# esta imagen los lleva dentro, así que basta con un Deployment, un Service y un disco.
+# Versión: la última publicada (19.5.3). Para actualizar, cambiar la tag de "image".
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitlab
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-data
+  namespace: gitlab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ce:19.5.3-ce.0
+          env:
+            # Configuración de GitLab: URL de acceso y ajustes para gastar poca memoria
+            - name: GITLAB_OMNIBUS_CONFIG
+              value: |
+                external_url 'http://localhost'
+                gitlab_rails['gitlab_shell_ssh_port'] = 2222
+                puma['worker_processes'] = 0
+                sidekiq['concurrency'] = 10
+                prometheus_monitoring['enable'] = false
+                registry['enable'] = false
+                gitlab_kas['enable'] = false
+                gitlab_rails['env'] = { 'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000' }
+          ports:
+            - name: http
+              containerPort: 80
+            - name: ssh
+              containerPort: 22
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          # Lista cuando GitLab responde de verdad (la primera vez tarda varios minutos)
+          readinessProbe:
+            exec:
+              command: ["curl", "-fs", "http://localhost/-/readiness"]
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 80
+          volumeMounts:
+            - name: data
+              mountPath: /etc/gitlab
+              subPath: config
+            - name: data
+              mountPath: /var/log/gitlab
+              subPath: logs
+            - name: data
+              mountPath: /var/opt/gitlab
+              subPath: data
+            - name: shm
+              mountPath: /dev/shm
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitlab-data
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
+---
+# Web en http://localhost (puerto 80) y SSH en el 2222, que k3d-config.yaml ya publica.
+# Desde dentro del clúster (Argo CD): http://gitlab.gitlab.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab
+  namespace: gitlab
+spec:
+  type: LoadBalancer
+  selector:
+    app: gitlab
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: ssh
+      port: 22
+      targetPort: 22
