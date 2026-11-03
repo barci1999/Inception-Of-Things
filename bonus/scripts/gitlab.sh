@@ -14,7 +14,7 @@ fi
 
 # La primera vez GitLab tarda varios minutos en configurarse y arrancar
 echo "⏳ Waiting for GitLab to be ready (first start takes 5-10 minutes)..."
-if ! sg docker -c "kubectl -n $NAMESPACE rollout status deployment/gitlab --timeout=1200s"; then
+if ! sg docker -c "kubectl -n $NAMESPACE rollout status deployment/gitlab --timeout=2400s"; then
     echo "❌ Error: GitLab did not become ready in 20 minutes."
     echo "   Check: kubectl -n $NAMESPACE get pods   and   kubectl -n $NAMESPACE logs deploy/gitlab"
     exit 1
