@@ -8,7 +8,7 @@ if ! command -v helm > /dev/null 2>&1; then
     curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
     echo "✅ helm successfully installed!"
 else
-    echo "✅ helm already installed!"k
+    echo "✅ helm already installed!"
 fi
 
 if ! command -v docker > /dev/null 2>&1; then
