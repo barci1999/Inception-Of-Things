@@ -1,0 +1,24 @@
+# (Nacho) App de Wil para el bonus. gitlabRepo.sh la sube al GitLab local (carpeta k8s/)
+# y Argo CD la despliega en dev. Para la demo, version.sh cambia la tag v1 <-> v2 en GitLab.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wil-playground
+  namespace: dev
+  labels:
+    app: wil-playground
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wil-playground
+  template:
+    metadata:
+      labels:
+        app: wil-playground
+    spec:
+      containers:
+        - name: playground
+          image: wil42/playground:v1
+          ports:
+            - containerPort: 8888
