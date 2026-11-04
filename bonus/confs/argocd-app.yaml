@@ -8,8 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    # Repo público con el login en el nombre, como pide el subject
-    repoURL: https://github.com/nmagro-r/nmagro-r-iot-argocd.git
+    # (Nacho) Bonus: el repo vive en el GitLab local (lo crea gitlabRepo.sh). Es público,
+    # así que Argo CD lo lee por la dirección interna del clúster sin contraseña.
+    repoURL: http://gitlab.gitlab.svc.cluster.local/root/nmagro-r-iot-argocd.git
     targetRevision: main
     path: k8s
   destination:

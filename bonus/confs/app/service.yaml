@@ -1,0 +1,13 @@
+# (Nacho) LoadBalancer en el 8888: con el puerto 8888 publicado en k3d, curl localhost:8888 llega a la app.
+apiVersion: v1
+kind: Service
+metadata:
+  name: wil-playground
+  namespace: dev
+spec:
+  type: LoadBalancer
+  selector:
+    app: wil-playground
+  ports:
+    - port: 8888
+      targetPort: 8888
