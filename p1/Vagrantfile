@@ -6,30 +6,36 @@ File.write(TOKEN_FILE, SecureRandom.hex(32)) unless File.exist?(TOKEN_FILE)
 K3S_TOKEN = File.read(TOKEN_FILE).strip
 
 Vagrant.configure("2") do |config|
-  # (Nacho) Rocky Linux 10: última versión estable, y la box la publica la propia distro.
+  # (Nacho) Fedora 45: última versión estable, y la box la publica la propia Fedora (lo pide el subject).
+  # Antes era Rocky Linux 10, pero no arranca en los ordenadores de 42: exige instrucciones x86-64-v3
+  # y el VirtualBox 7.0 que tienen no se las da (se arregló en VirtualBox 7.2.10).
   # Ubuntu solo publica box de Vagrant para la 22.04, que ya no es la última.
-  config.vm.box = "rockylinux-10"
-  config.vm.box_url = "https://dl.rockylinux.org/pub/rocky/10/images/x86_64/Rocky-10-Vagrant-Vbox.latest.x86_64.vagrant.virtualbox.box"
+  config.vm.box = "fedora-45"
+  config.vm.box_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/45/Cloud/x86_64/images/Fedora-Cloud-Base-Vagrant-VirtualBox-45-1.4.x86_64.vagrant.virtualbox.box"
   # (Nacho) Sin carpeta compartida: los scripts los sube Vagrant y no dependemos de las Guest Additions.
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.define "smarquezS" do |server|
     server.vm.hostname = "smarquezS"
-    server.vm.network "private_network", ip: "192.168.56.110"
+    # (Nacho) auto_config: false: la IP la pone scripts/ip.sh, porque el Vagrant de 42 no sabe ponerla en Fedora 45.
+    server.vm.network "private_network", ip: "192.168.56.110", auto_config: false
     server.vm.provider "virtualbox" do |v|
       v.memory = 1024
       v.cpus = 1
     end
+    server.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.110"]
     server.vm.provision "shell", path: "scripts/server.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 
   config.vm.define "smarquezSW" do |control|
     control.vm.hostname = "smarquezSW"
-    control.vm.network "private_network", ip: "192.168.56.111"
+    # (Nacho) Igual que en smarquezS: la IP la pone scripts/ip.sh.
+    control.vm.network "private_network", ip: "192.168.56.111", auto_config: false
     control.vm.provider "virtualbox" do |v|
       v.memory = 1024
       v.cpus = 1
     end
+    control.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.111"]
     control.vm.provision "shell", path: "scripts/worker.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 end
