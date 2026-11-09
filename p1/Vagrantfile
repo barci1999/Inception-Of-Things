@@ -20,7 +20,9 @@ Vagrant.configure("2") do |config|
     # (Nacho) auto_config: false: la IP la pone scripts/ip.sh, porque el Vagrant de 42 no sabe ponerla en Fedora 45.
     server.vm.network "private_network", ip: "192.168.56.110", auto_config: false
     server.vm.provider "virtualbox" do |v|
-      v.memory = 1024
+      # (Nacho) 2 GB: con 1 GB, Fedora 45 + K3s tiraba del swap y smarquezSW no conseguía unirse.
+      # El subject solo lo recomienda (1 CPU y 512 MB o 1024); K3s pide 2 GB para el server.
+      v.memory = 2048
       v.cpus = 1
     end
     server.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.110"]
