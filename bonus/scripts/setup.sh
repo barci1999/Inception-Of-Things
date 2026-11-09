@@ -2,15 +2,9 @@
 
 echo "🔍 Checking system dependencies..."
 
-# Check and install Docker
-if ! command -v helm > /dev/null 2>&1; then
-    echo "⚙️ helm is not installed. Installing..."
-    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-    echo "✅ helm successfully installed!"
-else
-    echo "✅ helm already installed!"
-fi
+# (Nacho) Quitada la instalación de Helm: ya no se usa (GitLab va con la imagen gitlab-ce, sin chart).
 
+# Check and install Docker
 if ! command -v docker > /dev/null 2>&1; then
     echo "⚙️ Docker is not installed. Installing..."
     
