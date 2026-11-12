@@ -1,6 +1,3 @@
-# Configuración de nginx compartida por las 3 apps.
-# "ssi on" permite que el index.html muestre el nombre del pod que responde,
-# así se ve que app2 reparte entre sus 3 réplicas.
 apiVersion: v1
 kind: ConfigMap
 metadata:

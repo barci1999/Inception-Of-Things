@@ -1,4 +1,3 @@
-# app2: responde a las peticiones con HOST app2.com. El subject pide 3 réplicas.
 apiVersion: v1
 kind: ConfigMap
 metadata:
