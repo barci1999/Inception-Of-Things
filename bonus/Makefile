@@ -22,11 +22,6 @@ init: setup
 fclean:
 	@bash scripts/clean.sh
 re: fclean init
-prueba:
-	@bash scripts/setup.sh
-	@bash scripts/cluster.sh
-	@bash scripts/namespace.sh
-	@bash scripts/gitlab.sh
 
 
 .PHONY: setup purge
