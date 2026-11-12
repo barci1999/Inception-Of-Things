@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# (Nacho) Crea en el GitLab local el proyecto público root/nmagro-r-iot-argocd y le sube la app
-# de confs/app/ en la carpeta k8s/. Argo CD lo lee desde dentro del clúster sin contraseña:
-#   http://gitlab.gitlab.svc.cluster.local/root/nmagro-r-iot-argocd.git
-# Se usa gitlab-rails dentro del pod, así no hace falta ningún token ni contraseña.
 NAMESPACE="gitlab"
 PROJECT="nmagro-r-iot-argocd"
 APP_DIR="confs/app"

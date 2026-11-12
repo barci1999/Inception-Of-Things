@@ -1,20 +1,13 @@
-# P2: una sola VM (smarquezS) con K3s en modo server y las 3 apps de confs/.
 Vagrant.configure("2") do |config|
-  # Fedora 45: última versión estable, y la box la publica la propia Fedora (lo pide el subject).
-  # Antes era Rocky Linux 10, pero no arranca con el VirtualBox 7.0 de los ordenadores de 42
-  # (exige instrucciones x86-64-v3 que esa versión no le da; se arregló en VirtualBox 7.2.10).
   config.vm.box = "fedora-45"
   config.vm.box_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/45/Cloud/x86_64/images/Fedora-Cloud-Base-Vagrant-VirtualBox-45-1.4.x86_64.vagrant.virtualbox.box"
-  # Sin carpeta compartida: los ficheros los sube Vagrant y no dependemos de las Guest Additions.
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.define "smarquezS" do |server|
     server.vm.hostname = "smarquezS"
-    # auto_config: false: la IP la pone scripts/ip.sh, porque el Vagrant de 42 no sabe ponerla en Fedora 45.
     server.vm.network "private_network", ip: "192.168.56.110", auto_config: false
     server.vm.provider "virtualbox" do |v|
       v.name = "smarquezS"
-      # K3s pide 2 GB para el server, y aquí corren además Traefik y 5 pods.
       v.memory = 2048
       v.cpus = 1
     end

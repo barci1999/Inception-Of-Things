@@ -2,7 +2,6 @@
 
 echo "🧹 Starting system purge (uninstalling Docker, K3d, and kubectl)..."
 
-# Uninstall Docker
 if command -v docker > /dev/null 2>&1; then
     echo "🗑️ Uninstalling Docker..."
     sudo systemctl stop docker.service docker.socket containerd.service 2>/dev/null || true
@@ -13,7 +12,6 @@ else
     echo "ℹ️ Docker was not installed."
 fi
 
-# Remove K3d
 if command -v k3d > /dev/null 2>&1; then
     echo "🗑️ Removing K3d binary..."
     sudo rm -f $(which k3d) || sudo rm -f /usr/local/bin/k3d || true
@@ -22,7 +20,6 @@ else
     echo "ℹ️ K3d was not installed."
 fi
 
-# Remove kubectl
 if command -v kubectl > /dev/null 2>&1; then
     echo "🗑️ Removing kubectl binary..."
     sudo rm -f /usr/local/bin/kubectl

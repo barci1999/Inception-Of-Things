@@ -1,4 +1,3 @@
-# app1: responde a las peticiones con HOST app1.com
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# (Nacho) Abre la web de Argo CD en https://localhost:8443 (Ctrl+C para cerrar).
-# Uso el 8443 porque el 8080 ya lo reserva k3d-config.yaml en el loadbalancer.
 NAMESPACE="argocd"
 PORT=8443
 

@@ -1,4 +1,3 @@
-# app3: responde a cualquier HOST que no sea app1.com ni app2.com
 apiVersion: v1
 kind: ConfigMap
 metadata:

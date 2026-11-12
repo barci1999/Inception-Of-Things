@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# (Nacho) Demo del bonus: cambia la versión de la app (v1 <-> v2) en el GitLab local.
-# Uso: bash scripts/version.sh v2
-# Hace un commit en root/nmagro-r-iot-argocd (k8s/deployment.yaml) y avisa a Argo CD para que no espere 3 minutos.
 NAMESPACE="gitlab"
 PROJECT="nmagro-r-iot-argocd"
 TAG="$1"
@@ -37,6 +34,5 @@ then
     exit 1
 fi
 
-# Igual que el botón "Refresh" de Argo CD
 sg docker -c "kubectl -n argocd annotate application wil-playground argocd.argoproj.io/refresh=normal --overwrite" >/dev/null 2>&1
 echo "✅ Done. In a few seconds: curl http://localhost:8888/"

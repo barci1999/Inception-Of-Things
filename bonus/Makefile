@@ -11,7 +11,6 @@ setup:
 	@bash scripts/setup.sh
 purge: fclean
 	@bash scripts/purge.sh
-# (Nacho) Añadidos gitlab.sh y gitlabRepo.sh: Argo CD lee la app del GitLab local
 init: setup
 	@bash scripts/cluster.sh
 	@bash scripts/namespace.sh
