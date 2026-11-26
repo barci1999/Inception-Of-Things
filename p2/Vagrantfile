@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "fedora-45"
+  config.vm.box_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/45/Cloud/x86_64/images/Fedora-Cloud-Base-Vagrant-VirtualBox-45-1.4.x86_64.vagrant.virtualbox.box"
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.define "smarquezS" do |server|
+    server.vm.hostname = "smarquezS"
+    server.vm.network "private_network", ip: "192.168.56.110", auto_config: false
+    server.vm.provider "virtualbox" do |v|
+      v.name = "smarquezS"
+      v.memory = 2048
+      v.cpus = 1
+    end
+    server.vm.provision "file", source: "confs", destination: "/tmp/confs"
+    server.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.110"]
+    server.vm.provision "shell", path: "scripts/server.sh"
+  end
+end

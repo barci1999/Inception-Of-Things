@@ -1,0 +1,3 @@
+.vagrant/
+.k3s-token
+.DS_Store

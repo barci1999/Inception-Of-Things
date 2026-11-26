@@ -1,26 +1,33 @@
-Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu-jammy"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-vagrant.box"
+require "securerandom"
 
-  # Desactivar la sustitución automática de la clave SSH para evitar el fallo de clave privada
+TOKEN_FILE = File.join(__dir__, ".k3s-token")
+File.write(TOKEN_FILE, SecureRandom.hex(32)) unless File.exist?(TOKEN_FILE)
+K3S_TOKEN = File.read(TOKEN_FILE).strip
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "fedora-45"
+  config.vm.box_url = "https://dl.fedoraproject.org/pub/fedora/linux/releases/45/Cloud/x86_64/images/Fedora-Cloud-Base-Vagrant-VirtualBox-45-1.4.x86_64.vagrant.virtualbox.box"
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.define "smarquezS" do |server|
     server.vm.hostname = "smarquezS"
-    server.vm.network "private_network", ip: "192.168.56.110"
+    server.vm.network "private_network", ip: "192.168.56.110", auto_config: false
     server.vm.provider "virtualbox" do |v|
-      v.memory = 1024
+      v.memory = 2048
       v.cpus = 1
     end
-    server.vm.provision "shell", path: "scripts/server.sh"
+    server.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.110"]
+    server.vm.provision "shell", path: "scripts/server.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 
   config.vm.define "smarquezSW" do |control|
     control.vm.hostname = "smarquezSW"
-    control.vm.network "private_network", ip: "192.168.56.111"
+    control.vm.network "private_network", ip: "192.168.56.111", auto_config: false
     control.vm.provider "virtualbox" do |v|
       v.memory = 1024
       v.cpus = 1
     end
-    control.vm.provision "shell", path: "scripts/worker.sh"
+    control.vm.provision "shell", path: "scripts/ip.sh", args: ["192.168.56.111"]
+    control.vm.provision "shell", path: "scripts/worker.sh", env: { "K3S_TOKEN" => K3S_TOKEN }
   end
 end
